@@ -1,0 +1,13 @@
+services:
+  blog:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+      - blog_node_modules:/app/node_modules
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "4321:4321"
+
+volumes:
+  blog_node_modules:

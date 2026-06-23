@@ -1,0 +1,324 @@
+---
+interface Props {
+  post: {
+    title: string;
+    slug: string;
+    date: Date;
+    tags: string[];
+    excerpt: string;
+    featured: boolean;
+    cover?: string;
+  };
+  delay?: string;
+}
+
+const { post, delay = '0s' } = Astro.props;
+const { title, slug, date, tags, excerpt, featured, cover } = post;
+
+const formattedDate = new Date(date).toLocaleDateString('en-US', {
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+}).toUpperCase();
+
+const tagColorMap: Record<string, string> = {
+  'cybersecurity': 'var(--c-cyber)',
+  'AI': 'var(--c-ai)',
+  'cryptography': 'var(--c-crypto)',
+  'crittografia': 'var(--c-crypto)',
+  'machine-learning': 'var(--c-ml)',
+  'reverse-engineering': 'var(--c-re)',
+  'physics': 'var(--c-phys)',
+  'fisica': 'var(--c-phys)',
+  'privacy': 'var(--c-priv)',
+  'llm': 'var(--c-llm)',
+  'space': 'var(--c-space)',
+  'spazio': 'var(--c-space)',
+  'hardware': 'var(--c-re)',
+};
+function tagColor(name: string): string {
+  return tagColorMap[name] ?? 'var(--accent)';
+}
+---
+
+{featured ? (
+  <div class="featured-wrap" style={`animation-delay:${delay}`} data-tags={post.tags.join(',')}>
+    <a href={`/blog/${slug}`} class:list={['featured-card', cover ? 'has-cover' : '']} data-tilt>
+      <span class="sheen"></span>
+      <div class="featured-body">
+        <span class="featured-label"><span class="featured-dot"></span>Featured</span>
+        <h2 class="featured-title">{title}</h2>
+        <p class="featured-excerpt">{excerpt}</p>
+        <div class="featured-footer">
+          <div class="tag-chips">
+            {tags.map(tag => (
+              <span class="tag-chip"><span class="tag-chip-dot" style={`background:${tagColor(tag)};`}></span>{tag}</span>
+            ))}
+          </div>
+          <span class="date-label">{formattedDate}</span>
+        </div>
+      </div>
+      {cover && (
+        <div class="featured-cover"
+             style={`background-image:url(${cover});background-size:cover;background-position:center;background-color:var(--surface-2);animation:none;`}>
+        </div>
+      )}
+    </a>
+  </div>
+) : (
+  <div class="card-wrap" style={`animation-delay:${delay}`} data-tags={post.tags.join(',')}>
+    <a href={`/blog/${slug}`} class="post-card" data-tilt>
+      <span class="sheen"></span>
+      <h3 class="card-title">{title}</h3>
+      <p class="card-excerpt">{excerpt}</p>
+      <div class="card-footer">
+        <div class="tag-chips">
+          {tags.map(tag => (
+            <span class="tag-chip"><span class="tag-chip-dot" style={`background:${tagColor(tag)};`}></span>{tag}</span>
+          ))}
+        </div>
+        <span class="date-label">{formattedDate}</span>
+      </div>
+    </a>
+  </div>
+)}
+
+<style>
+  .featured-wrap, .card-wrap {
+    animation: riseIn .5s var(--spring) both;
+    display: flex;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* ── Featured ── */
+  .featured-card {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 30px;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: transform .45s var(--spring), box-shadow .45s var(--ease), border-color .2s var(--ease);
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+  }
+
+  .featured-card.has-cover {
+    grid-template-columns: 1fr 300px;
+  }
+
+  .featured-card:hover {
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .featured-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .featured-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .featured-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex: none;
+  }
+
+  .featured-title {
+    margin: 0 0 14px;
+    font-family: var(--mono);
+    font-size: 29px;
+    line-height: 1.18;
+    font-weight: 600;
+    letter-spacing: -0.8px;
+    color: var(--text);
+    overflow-wrap: break-word;
+  }
+
+  .featured-excerpt {
+    margin: 0 0 22px;
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--muted);
+    max-width: 46ch;
+  }
+
+  .featured-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .featured-cover {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    min-height: 200px;
+    background-image: radial-gradient(120% 130% at 0% 0%, var(--c-ml) 0%, transparent 55%),
+                      radial-gradient(120% 120% at 100% 15%, var(--c-cyber) 0%, transparent 52%),
+                      radial-gradient(140% 150% at 85% 100%, var(--c-crypto) 0%, transparent 55%);
+    background-color: var(--c-ai);
+    animation: hueDrift 14s ease-in-out infinite;
+  }
+
+  @keyframes hueDrift {
+    0%   { filter: hue-rotate(0deg) saturate(1); }
+    50%  { filter: hue-rotate(-14deg) saturate(1.12); }
+    100% { filter: hue-rotate(0deg) saturate(1); }
+  }
+
+  /* ── Post card ── */
+  .post-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 24px;
+    cursor: pointer;
+    min-height: 188px;
+    box-shadow: var(--shadow-sm);
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: transform .45s var(--spring), box-shadow .45s var(--ease), border-color .2s var(--ease);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .post-card:hover {
+    border-color: var(--line-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-title {
+    margin: 0 0 11px;
+    font-family: var(--mono);
+    font-size: 18px;
+    line-height: 1.3;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--text);
+    overflow-wrap: break-word;
+  }
+
+  .card-excerpt {
+    margin: 0 0 18px;
+    font-family: var(--serif);
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  /* ── Shared ── */
+  .sheen {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 50%), var(--sheen-color, rgba(255,255,255,.40)), rgba(255,255,255,0) 60%);
+    opacity: var(--sheen, 0);
+    transition: opacity .3s var(--ease);
+  }
+
+  .tag-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text);
+    background: var(--surface-2);
+    padding: 3px 9px;
+    border-radius: 7px;
+  }
+
+  .tag-chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .date-label {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--faint);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 900px) {
+    .featured-card,
+    .featured-card.has-cover {
+      grid-template-columns: 1fr;
+    }
+    .featured-cover {
+      min-height: 140px;
+    }
+  }
+</style>
+
+<script>
+  // 3D tilt effect for all [data-tilt] cards
+  document.querySelectorAll('[data-tilt]').forEach(el => {
+    el.addEventListener('mousemove', (e) => {
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      el.style.transform = `perspective(950px) rotateX(${(-py * 4.5).toFixed(2)}deg) rotateY(${(px * 6).toFixed(2)}deg) translateY(-7px) scale(1.014)`;
+      el.style.setProperty('--mx', (px * 100 + 50).toFixed(1) + '%');
+      el.style.setProperty('--my', (py * 100 + 50).toFixed(1) + '%');
+      el.style.setProperty('--sheen', '1');
+    });
+    el.addEventListener('mouseleave', () => {
+      el.style.transform = '';
+      el.style.setProperty('--sheen', '0');
+    });
+  });
+</script>

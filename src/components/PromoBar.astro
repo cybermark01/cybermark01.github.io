@@ -1,0 +1,60 @@
+---
+import { promo } from '../config/promo';
+---
+
+{promo.enabled && (
+  <div class="promo-bar">
+    <span class="promo-badge">{promo.label}</span>
+    <span class="promo-text" set:html={promo.text} />
+    <a href={promo.url} target="_blank" rel="noopener noreferrer" class="promo-cta">{promo.cta} →</a>
+  </div>
+)}
+
+<style>
+  .promo-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 13px 18px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .promo-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-soft);
+    padding: 4px 9px;
+    border-radius: 5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .promo-text {
+    font-family: var(--serif);
+    font-size: 14px;
+    color: var(--muted);
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .promo-cta {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .promo-cta:hover {
+    opacity: 0.8;
+  }
+</style>

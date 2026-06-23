@@ -1,0 +1,61 @@
+---
+interface Props {
+  headings: { depth: number; slug: string; text: string }[];
+}
+
+const { headings } = Astro.props;
+const items = headings.filter((h) => h.depth === 2);
+---
+
+{items.length > 0 && (
+  <nav class="toc">
+    <ul>
+      {items.map((h) => (
+        <li>
+          <a href={`#${h.slug}`}>{h.text}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<style>
+  .toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .toc a {
+    display: block;
+    padding: 0.3rem 0.75rem;
+    border-left: 3px solid transparent;
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+
+  .toc a:hover {
+    color: var(--accent);
+  }
+
+  .toc a.active {
+    color: var(--accent);
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 8px 8px 0;
+    font-weight: 600;
+  }
+
+  @media (max-width: 768px) {
+    .toc a {
+      font-size: 14px;
+    }
+  }
+</style>

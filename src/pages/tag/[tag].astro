@@ -1,0 +1,147 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PostCard from '../../components/PostCard.astro';
+import TagSidebar from '../../components/TagSidebar.astro';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('posts');
+  const tagSet = new Set<string>();
+  for (const post of allPosts) {
+    for (const tag of post.data.tags) tagSet.add(tag);
+  }
+  return Array.from(tagSet).map((tag) => ({ params: { tag } }));
+}
+
+const { tag } = Astro.params;
+
+const allPosts = await getCollection('posts');
+const sorted = allPosts
+  .filter((p) => p.data.tags.includes(tag))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const tagMap = new Map<string, number>();
+for (const post of allPosts) {
+  for (const t of post.data.tags) {
+    tagMap.set(t, (tagMap.get(t) ?? 0) + 1);
+  }
+}
+const tags = Array.from(tagMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .map(([name, count]) => ({ name, count }));
+---
+
+<Base title={`Tag: ${tag} — cybermark`}>
+  <div class="tag-wrapper">
+    <TagSidebar tags={tags} activeTag={tag} />
+    <div class="posts-area">
+      <div class="tag-banner">
+        <div>
+          <div class="tag-eyebrow">Tag</div>
+          <h1 class="tag-heading">#{tag}</h1>
+          <div class="tag-count-label">{sorted.length} posts</div>
+        </div>
+        <a href="/" class="clear-filter">✕ clear filter</a>
+      </div>
+      <div class="post-grid">
+        {sorted.map((post, i) => (
+          <PostCard
+            post={{
+              title: post.data.title,
+              slug: post.slug,
+              date: post.data.date,
+              tags: post.data.tags,
+              excerpt: post.data.excerpt,
+              featured: false,
+            }}
+            delay={`${i * 0.06}s`}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .tag-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 32px 72px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 56px;
+    align-items: start;
+    animation: pageIn .5s var(--ease) both;
+  }
+
+  .posts-area { min-width: 0; }
+
+  .tag-banner {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .tag-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--faint);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .tag-heading {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+
+  .tag-count-label {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .clear-filter {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--line-strong);
+    border-radius: 7px;
+    padding: 7px 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+
+  .clear-filter:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .post-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+
+  @media (max-width: 900px) {
+    .tag-wrapper {
+      grid-template-columns: 1fr;
+      padding: 24px 16px 48px;
+    }
+    .post-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

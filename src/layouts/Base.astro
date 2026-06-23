@@ -1,0 +1,138 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description ?? 'cybermark01 — cybersecurity blog'} />
+    <title>{title}</title>
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "f5fcf8d4c1254e838a67fc571ab6dae3"}'></script>
+    <script is:inline>
+      (function () {
+        const stored = localStorage.getItem('theme');
+        if (stored === 'dark') {
+          document.documentElement.removeAttribute('data-theme');
+        }
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <header style="position:sticky;top:0;z-index:50;background:var(--header-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);box-shadow:var(--shadow-sm);">
+      <div class="max-w-[1200px] mx-auto px-4 sm:px-8 py-4 flex items-center justify-between">
+        <a
+          href="/"
+          class="logo-link flex items-center"
+          style="font-family:var(--display);color:var(--text);text-decoration:none;font-weight:700;letter-spacing:0.5px;"
+        >
+          cybermark<span style="color:var(--accent);">_</span>
+        </a>
+        <nav class="flex items-center nav-links">
+          <a href="/" data-nav="home" data-path="/" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);text-decoration:none;position:relative;">
+            <span class="nav-underbar" style="position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--accent);border-radius:2px;display:none;"></span><span class="nav-emoji">🏠</span><span class="nav-label"> Home</span></a>
+          <span class="nav-sep">|</span>
+          <a href="/portfolio" data-nav="portfolio" data-path="/portfolio" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);text-decoration:none;position:relative;">
+            <span class="nav-underbar" style="position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--accent);border-radius:2px;display:none;"></span><span class="nav-emoji">💼</span><span class="nav-label"> Portfolio</span></a>
+          <span class="nav-sep">|</span>
+          <a href="/bookmarks" data-nav="bookmarks" data-path="/bookmarks" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);text-decoration:none;position:relative;">
+            <span class="nav-underbar" style="position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--accent);border-radius:2px;display:none;"></span><span class="nav-emoji">⭐</span><span class="nav-label"> Bookmarks</span></a>
+          <span class="nav-sep">|</span>
+          <a href="/about" data-nav="about" data-path="/about" style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text);text-decoration:none;position:relative;">
+            <span class="nav-underbar" style="position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--accent);border-radius:2px;display:none;"></span><span class="nav-emoji">👤</span><span class="nav-label"> About</span></a>
+          <button
+            id="theme-toggle"
+            aria-label="Toggle theme"
+            class="flex items-center justify-center"
+            style="width:34px;height:34px;background:none;border:1px solid var(--line-strong);border-radius:10px;cursor:pointer;color:var(--text);transition:border-color .2s var(--ease),color .2s var(--ease),transform .2s var(--spring);"
+          >
+            <span style="display:inline-block;width:15px;height:15px;border-radius:50%;border:1.5px solid currentColor;background:linear-gradient(90deg,currentColor 0 50%,transparent 50% 100%);"></span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <footer style="border-top:1px solid var(--line);">
+      <div style="max-width:1200px;margin:0 auto;padding:24px 32px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--faint);">
+        <span>© 2026 cybermark01</span>
+      </div>
+    </footer>
+
+    <script is:inline>
+      (function () {
+        const btn = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        btn.addEventListener('click', function () {
+          const isLight = html.getAttribute('data-theme') === 'light';
+          if (isLight) {
+            html.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            html.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+          }
+        });
+
+        btn.addEventListener('mouseenter', function () {
+          btn.style.borderColor = 'var(--accent)';
+          btn.style.color = 'var(--accent)';
+        });
+        btn.addEventListener('mouseleave', function () {
+          btn.style.borderColor = 'var(--line-strong)';
+          btn.style.color = 'var(--text)';
+          btn.style.transform = '';
+        });
+        btn.addEventListener('mousedown', function () {
+          btn.style.transform = 'scale(.92)';
+        });
+        btn.addEventListener('mouseup', function () {
+          btn.style.transform = '';
+        });
+
+        const path = window.location.pathname;
+        document.querySelectorAll('[data-nav]').forEach(function (a) {
+          const p = a.dataset.path;
+          const match = p === '/' ? path === '/' : path === p || path.startsWith(p + '/');
+          if (match) {
+            a.style.color = 'var(--accent)';
+            const bar = a.querySelector('.nav-underbar');
+            if (bar) bar.style.display = 'block';
+          }
+        });
+      })();
+    </script>
+    <style>
+      /* Logo responsive — Orbitron è molto più largo di Plex Mono */
+      .logo-link { font-size: 20px; }
+      @media (max-width: 640px) { .logo-link { font-size: 16px; } }
+      @media (max-width: 380px) {
+        .logo-link { font-size: 13px; }
+        .nav-links a[data-nav] { font-size: 11px; }
+      }
+      /* Previeni overflow orizzontale dell'header */
+      header { overflow: hidden; }
+      .nav-links { gap: 12px; }
+      .nav-sep { color: var(--line-strong); font-size: 13px; user-select: none; }
+      .nav-emoji { font-size: 14px; line-height: 1; display: inline-block; }
+      @media (max-width: 640px) {
+        .nav-sep { display: none; }
+        .nav-links { gap: 18px; }
+        .nav-label { display: none; }
+        .nav-emoji { font-size: 26px; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; }
+      }
+    </style>
+  </body>
+</html>

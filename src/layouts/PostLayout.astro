@@ -1,0 +1,317 @@
+---
+import Base from './Base.astro';
+import PromoBar from '../components/PromoBar.astro';
+import TableOfContents from '../components/TableOfContents.astro';
+
+interface Props {
+  frontmatter: {
+    title: string;
+    date: Date;
+    tags: string[];
+    excerpt: string;
+    cover?: string;
+  };
+  headings: { depth: number; slug: string; text: string }[];
+}
+
+const { frontmatter, headings } = Astro.props;
+const { title, date, tags, cover } = frontmatter;
+
+const formattedDate = new Date(date).toLocaleDateString('en-US', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+const tagColorMap: Record<string, string> = {
+  'cybersecurity': 'var(--c-cyber)',
+  'AI': 'var(--c-ai)',
+  'cryptography': 'var(--c-crypto)',
+  'crittografia': 'var(--c-crypto)',
+  'machine-learning': 'var(--c-ml)',
+  'reverse-engineering': 'var(--c-re)',
+  'physics': 'var(--c-phys)',
+  'fisica': 'var(--c-phys)',
+  'privacy': 'var(--c-priv)',
+  'llm': 'var(--c-llm)',
+  'space': 'var(--c-space)',
+  'spazio': 'var(--c-space)',
+  'hardware': 'var(--c-re)',
+};
+function tagColor(name: string): string {
+  return tagColorMap[name] ?? 'var(--accent)';
+}
+---
+
+<Base title={`${title} — cybermark`} description={frontmatter.excerpt}>
+  <div class="post-layout">
+    <div class="post-main">
+      <a href="/" class="back-link">← all posts</a>
+      <header class="article-header">
+        <div class="article-tags">
+          {tags.map((tag) => (
+            <a href={`/tag/${tag}`} class="tag-chip"><span class="tag-chip-dot" style={`background:${tagColor(tag)};`}></span>{tag}</a>
+          ))}
+        </div>
+        <h1 class="article-title">{title}</h1>
+        <div class="article-meta">{formattedDate}</div>
+      </header>
+      <PromoBar />
+      {cover && (
+        <img src={cover} alt="" class="article-cover" />
+      )}
+      <div class="toc-mobile">
+        <button class="toc-toggle" id="toc-toggle-btn">
+          <span>Contents</span>
+          <span class="toc-chevron">▸</span>
+        </button>
+        <div class="toc-body" id="toc-body" hidden>
+          <TableOfContents headings={headings} />
+        </div>
+      </div>
+      <article class="prose max-w-none">
+        <slot />
+      </article>
+    </div>
+    <aside class="toc-desktop">
+      <p class="toc-title">On this page</p>
+      <TableOfContents headings={headings} />
+    </aside>
+  </div>
+</Base>
+
+<style>
+  .post-layout {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 768px) 264px;
+    align-items: start;
+    gap: 52px;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 48px 16px;
+    animation: pageIn .25s var(--ease) both;
+  }
+
+  .post-main {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  .back-link {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--muted);
+    text-decoration: none;
+    margin-bottom: 30px;
+  }
+
+  .back-link:hover {
+    color: var(--accent);
+  }
+
+  .article-header {
+    margin-bottom: 2rem;
+  }
+
+  .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text);
+    background: var(--surface-2);
+    padding: 3px 9px;
+    border-radius: 7px;
+    text-decoration: none;
+    transition: opacity .15s var(--ease);
+  }
+
+  .tag-chip:hover {
+    opacity: 0.8;
+  }
+
+  .tag-chip-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .article-title {
+    margin: 0 0 14px;
+    font-family: var(--mono);
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: -1.2px;
+    line-height: 1.14;
+    color: var(--text);
+  }
+
+  .article-meta {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--faint);
+  }
+
+  .toc-desktop {
+    grid-column: 3;
+    width: 264px;
+    position: sticky;
+    top: 88px;
+    align-self: start;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+    padding: 22px 18px;
+    box-shadow: var(--shadow-md);
+  }
+
+  .toc-title {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--faint);
+    text-align: center;
+    margin: 0 0 8px;
+    padding: 0 0 14px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .toc-mobile {
+    display: none;
+  }
+
+  .toc-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    padding: 14px 18px;
+  }
+
+  .toc-toggle:hover {
+    color: var(--accent);
+  }
+
+  .toc-chevron {
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  .toc-body {
+    padding: 0 18px 14px;
+  }
+
+  @media (max-width: 900px) {
+    .post-layout {
+      display: block;
+      padding: 24px 16px;
+    }
+
+    .post-main {
+      max-width: none;
+    }
+
+    .toc-desktop {
+      display: none;
+    }
+
+    .toc-mobile {
+      display: block;
+      position: sticky;
+      top: 70px;
+      z-index: 40;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .article-title {
+      font-size: 28px;
+    }
+  }
+
+  .article-cover {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 1.75rem;
+    object-fit: cover;
+    max-height: 420px;
+    display: block;
+  }
+
+  .table-wrap {
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+    max-width: 100%;
+  }
+  .table-wrap .prose table {
+    margin-bottom: 0;
+  }
+</style>
+
+<script is:inline>
+  document.getElementById('toc-toggle-btn')?.addEventListener('click', () => {
+    const body = document.getElementById('toc-body');
+    const chevron = document.querySelector('.toc-chevron');
+    if (body) { body.hidden = !body.hidden; if(chevron) chevron.textContent = body.hidden ? '▸' : '▾'; }
+  });
+
+  const links = document.querySelectorAll('.toc a');
+  links.forEach(a => a.addEventListener('click', () => {
+    const body = document.getElementById('toc-body');
+    const chevron = document.querySelector('.toc-chevron');
+    if (body && !body.hidden) { body.hidden = true; if (chevron) chevron.textContent = '▸'; }
+  }));
+
+  const targets = Array.from(document.querySelectorAll('article h2[id]'));
+
+  if (links.length && targets.length) {
+    const OFFSET = 88; // scroll-margin-top (80px) + small buffer
+
+    function updateActive() {
+      let current = targets[0].id;
+      for (const t of targets) {
+        if (t.getBoundingClientRect().top <= OFFSET) current = t.id;
+      }
+      links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current));
+    }
+
+    let raf;
+    window.addEventListener('scroll', () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(updateActive);
+    }, { passive: true });
+    updateActive();
+  }
+
+  document.querySelectorAll('.prose table').forEach(function(table) {
+    var w = document.createElement('div');
+    w.className = 'table-wrap';
+    table.parentNode.insertBefore(w, table);
+    w.appendChild(table);
+  });
+</script>

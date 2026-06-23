@@ -1,0 +1,102 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PostCard from '../components/PostCard.astro';
+import TagSidebar from '../components/TagSidebar.astro';
+import PromoBar from '../components/PromoBar.astro';
+
+const allPosts = await getCollection('posts');
+const sorted = allPosts.sort((a, b) => {
+  if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+  return b.data.date.valueOf() - a.data.date.valueOf();
+});
+
+const tagMap = new Map<string, number>();
+for (const post of sorted) {
+  for (const tag of post.data.tags) {
+    tagMap.set(tag, (tagMap.get(tag) ?? 0) + 1);
+  }
+}
+const tags = Array.from(tagMap.entries())
+  .sort((a, b) => b[1] - a[1])
+  .map(([name, count]) => ({ name, count }));
+
+const featured = sorted[0]?.data.featured ? sorted[0] : null;
+const rest = featured ? sorted.slice(1) : sorted;
+---
+
+<Base title="cybermark — blog">
+  <div class="home-wrapper">
+    <TagSidebar tags={tags} activeTag={null} totalPosts={sorted.length} />
+    <div class="posts-area">
+      <PromoBar />
+      {featured && (
+        <div class="featured-outer" style="margin-bottom:32px;">
+          <PostCard
+            post={{
+              title: featured.data.title,
+              slug: featured.slug,
+              date: featured.data.date,
+              tags: featured.data.tags,
+              excerpt: featured.data.excerpt,
+              featured: true,
+              cover: featured.data.cover,
+            }}
+            delay="0s"
+          />
+        </div>
+      )}
+      <div class="post-grid">
+        {rest.map((post, i) => (
+          <PostCard
+            post={{
+              title: post.data.title,
+              slug: post.slug,
+              date: post.data.date,
+              tags: post.data.tags,
+              excerpt: post.data.excerpt,
+              featured: false,
+              cover: post.data.cover,
+            }}
+            delay={`${i * 0.06}s`}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .home-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 32px 72px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 56px;
+    align-items: start;
+    animation: pageIn .35s var(--ease) both;
+  }
+
+  .posts-area {
+    min-width: 0;
+  }
+
+  .post-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+  }
+
+  @media (max-width: 900px) {
+    .home-wrapper {
+      grid-template-columns: 1fr;
+      padding: 24px 16px 48px;
+    }
+
+    .post-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
